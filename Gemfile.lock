@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    flickrize (0.0.1)
+      flickraw (~> 0.8.4)
+      will_paginate (~> 3.0)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    flickraw (0.8.4)
+      json (>= 1.1.1)
+    json (1.6.3)
+    will_paginate (3.0.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  flickrize!
