@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   #s.add_development_dependency "sqlite3"
   
-  s.add_dependency "flickraw", "~> 0.8.4"
+  s.add_dependency "flickraw", "~> 0.9.5"
   s.add_dependency "will_paginate", "~> 3.0"
   s.add_dependency "rails", "~> 3.1.3"
 end
