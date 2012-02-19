@@ -7,8 +7,8 @@ module Flickrize
     if options[:auth_token]
       flickr.auth.checkToken :auth_token => options[:auth_token]
     else
-      flickr.access_token options[:oauth_token]
-      flickr.access_secret options[:oauth_token_secret]
+      flickr.access_token = options[:oauth_token]
+      flickr.access_secret = options[:oauth_token_secret]
     end
   end
   class Base
@@ -110,8 +110,8 @@ module Flickrize
         if FLICKR_AUTH_CHECK_TOKEN
           flickr.auth.checkToken :auth_token => FLICKR_AUTH_CHECK_TOKEN
         else
-          flickr.access_token FLICKR_OAUTH_CHECK_TOKEN
-          flickr.access_secret FLICKR_OAUTH_CHECK_TOKEN_SECRET
+          flickr.access_token = FLICKR_OAUTH_CHECK_TOKEN
+          flickr.access_secret = FLICKR_OAUTH_CHECK_TOKEN_SECRET
         end
       rescue
       end
