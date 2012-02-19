@@ -4,8 +4,12 @@ module Flickrize
     #require 'will_paginate'
     FlickRaw.api_key = options[:api_key]
     FlickRaw.shared_secret = options[:shared_secret]
-    flickr.access_token options[:oauth_token]
-    flickr.access_secret options[:oauth_token_secret]
+    if options[:auth_token]
+      flickr.auth.getToken options[:auth_token]
+    else
+      flickr.access_token options[:oauth_token]
+      flickr.access_secret options[:oauth_token_secret]
+    end
   end
   class Base
     attr_accessor :id, :image, :title, :description, :type    
@@ -103,8 +107,12 @@ module Flickrize
     # otherwise flickr auto logged on with an initializer file or whatever
     def self.flickr_auto_login
       begin
-        flickr.access_token options[:oauth_token]
-        flickr.access_secret options[:oauth_token_secret]
+        if FLICKR_OAUTH_CHECK_TOKEN
+          flickr.auth.getToken FLICKR_AUTH_CHECK_TOKEN
+        else
+          flickr.access_token FLICKR_OAUTH_CHECK_TOKEN
+          flickr.access_secret FLICKR_OAUTH_CHECK_TOKEN_SECRET
+        end
       rescue
       end
     end
