@@ -13,8 +13,10 @@ Gem::Specification.new do |s|
   s.summary     = "Create a model to use flickraw with easyness"
   s.description = "Create a model to use flickraw with easyness and will paginate for paginating any photoset. I use this code on my projects, it is very _ugly_ and *without test code* nor *documentation* (not yet)! Use at your own risk!!!"
 
-  s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
-  s.test_files = Dir["test/**/*"]
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.require_paths = ["lib"]
 
   #s.add_development_dependency "sqlite3"
   

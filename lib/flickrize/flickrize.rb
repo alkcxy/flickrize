@@ -12,7 +12,7 @@ module Flickrize
     end
   end
   class Base
-    attr_accessor :id, :image, :title, :description, :type    
+    attr_accessor :id, :image, :title, :description, :type
     cattr_accessor :per_page
     @@per_page = 10
     
