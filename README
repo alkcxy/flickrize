@@ -1,3 +1,10 @@
 = Flickrize
 
 This project rocks and uses MIT-LICENSE.
+
+For testing, create file test/dummy/config/initializers/flickraw.rb 
+
+and fill in:
+options = { api_key: YOUR_API_KEY, shared_secret: YOUR_SHARED_SECRET, oauth_token: YOUR_OAUTH_TOKEN, oauth_token_secret: YOUR_OAUTH_TOKEN_SECRET }
+Flickrize::initialize_with options
+

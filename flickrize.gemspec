@@ -18,7 +18,8 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  #s.add_development_dependency "sqlite3"
+  s.add_development_dependency "sqlite3"
+  s.add_development_dependency "turn"
   
   s.add_dependency "flickraw", "~> 0.9.5"
   s.add_dependency "will_paginate", "~> 3.0"

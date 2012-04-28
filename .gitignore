@@ -1,0 +1,9 @@
+.bundle/
+.project
+log/*.log
+pkg/
+test/dummy/db/*.sqlite3
+test/dummy/log/*.log
+test/dummy/tmp/
+test/dummy/config/initializers/flickraw.rb
+vendor/

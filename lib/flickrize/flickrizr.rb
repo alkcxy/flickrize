@@ -1,44 +1,124 @@
-require 'active_support/concern'
-
 module Flickrize
   module Flickrizr
+    require 'active_support/concern'
+    require 'flickraw'
     extend ActiveSupport::Concern
- 
+
     included do
     end
-    
+
     module ClassMethods
+
       def flickrizr(options={}, &block)
-        cattr_accessor :flickr_id, :set_id, :gallery_id, :image
-        self.flickr_id = (options[:flickr_id] || :flickr_id).to_s
-        self.set_id = (options[:set_id] || :set_id).to_s
-        self.gallery_id = (options[:gallery_id] || :gallery_id).to_s
-        self.image = (options[:image] || :image).to_s
-        self.image_url = (options[:image_url] || :image_url).to_s
-        before create do |record|
-          if !self.class.image.blank?
-            flickr_image = self.class.image.path
-            write_attribute(self.class.flickr_id, flickr.upload_photo(flickr_image, :title => self[:title], :description => self[:description], :is_public => self[:is_public], :hidden => self[:hidden]))            
-          else !self.class.image_url.blank?
-            open(self.class.image_url, 'rb') do |image_url|
+        options.reverse_merge! flickr_id: :flickr_id, image: :image, server: :server, secret: :secret, originalsecret: :originalsecret, originalformat: :originalformat, set_ids: :set_ids, title: :title, description: :description, hidden: :hidden, is_public: :is_public, farm: :farm 
+        class_attribute :iop
+        attr_accessor options[:image], options[:set_ids]
+        self.iop = options
+        #options.each do |k, v|
+        #  attr_accessor v.to_sym if !instance_methods.index { |m| m == v.to_sym }
+        #end
+
+        before_create do |record|
+          if !record.send(options[:image]).blank? && record.send(options[:image]).respond_to?(:path)
+            flickr_image = record.send(options[:image])
+            begin
+              flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => record.send(options[:is_public]), :hidden => record.send(options[:hidden]))
+            rescue Exception => e
+              record.errors.add options[:image], e
+            end
+          elsif !record.send(options[:image]).blank?
+            require 'open-uri'
+            open(record.send(options[:image]), 'rb') do |image_url|
               flickr_image = Tempfile.new(['flickrup', '.jpg']) 
               begin
-                while !image_url.eof
-                  flickr_image.binmode.write(image_url.read(4096))
-                end
+                flickr_image.binmode.write(image_url.read(4096)) while !image_url.eof
                 flickr_image.rewind
-                write_attribute(self.class.flickr_id, flickr.upload_photo(flickr_image, :title => self[:title], :description => self[:description], :is_public => self[:is_public], :hidden => self[:hidden]))
+                begin
+                  flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => record.send(options[:is_public]), :hidden => record.send(options[:hidden]))
+                rescue Exception => e
+                  record.errors.add options[:image], e
+                end
               ensure
                 flickr_image.close
                 flickr_image.unlink
               end
             end
           end
-          flickr.photosets.addPhoto :photoset_id => self.class.set_id, :photo_id => self.class.flickr_id unless self.class.set_id.blank?
+          if !flickr_id.blank?
+            record.send("#{options[:flickr_id]}=", flickr_id)
+            begin
+              flickr_obj = flickr.photos.getInfo(:photo_id => flickr_id)
+              record.send("#{options[:farm]}=", flickr_obj.farm)
+              record.send("#{options[:server]}=", flickr_obj.server)
+              record.send("#{options[:secret]}=", flickr_obj.secret)
+              record.send("#{options[:originalsecret]}=", flickr_obj.originalsecret)
+              record.send("#{options[:originalformat]}=", flickr_obj.originalformat)
+              record.send(options[:set_ids]).each do |k, set_id|
+                flickr.photosets.addPhoto :photoset_id => set_id, :photo_id => record.send(options[:flickr_id])
+              end unless record.send(options[:set_ids]).blank?
+            rescue Exception => e
+              flickr.photos.delete photo_id: flickr_id
+              record.errors.add options[:image], e
+              return false
+            end
+          else
+            return false
+          end
+        end
+        
+        before_update do |record|
+          begin
+            flickr.photos.setMeta photo_id: record.send(options[:flickr_id]), title: record.send(options[:title]), description: record.send(options[:description])
+            sets = flickr.photos.getAllContexts(photo_id: record.send(options[:flickr_id])).set
+            set_ids = record.send(options[:set_ids])
+            sets.each do |set|
+              ps = set_ids.key(set.id)
+              if ps.blank?
+                flickr.photosets.removePhoto photo_id: record.send(options[:flickr_id]), photoset_id: set.id
+              else
+                set_ids.delete ps
+              end
+            end
+            set_ids.each do |k, set_id|
+              flickr.photosets.addPhoto photo_id: record.send(options[:flickr_id]), photoset_id: set_id
+            end
+          rescue Exception => e
+            record.errors.add options[:image], e
+            return false
+          end
+        end
+        
+        before_destroy do |record|
+          begin
+            flickr.photos.delete photo_id: record.send(options[:flickr_id])
+          rescue Exception => e
+            record.errors.add options[:image], e
+            return false
+          end
         end
       end
     end
+    def url
+      url_
+    end
+    def method_missing(sym, *args, &block)
+      if sym.to_s.start_with? "url_"
+        url_suffix = sym.to_s.sub(/^url/,"")
+        format = "jpg"
+        if sym.to_s.end_with? "_o"
+          format = self.send(self.iop[:originalformat])
+        elsif sym.to_s.end_with? "_"
+          url_suffix = ""
+        end
+        PHOTO_SOURCE_URL % [self.send(self.iop[:farm]), self.send(self.iop[:server]), self.send(self.iop[:flickr_id]), self.send(self.iop[:secret]), url_suffix, format]
+      else
+        super
+      end
+    end
+    private
+    PHOTO_SOURCE_URL = 'http://farm%s.static.flickr.com/%s/%s_%s%s.%s'.freeze
   end
 end
-
-ActiveRecord::Base.send :include, Flickrize::Flickrizr 
+require 'active_record'
+ActiveRecord::Base.send :include, Flickrize::Flickrizr
+ 

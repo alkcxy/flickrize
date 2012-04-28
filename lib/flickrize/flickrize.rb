@@ -1,7 +1,5 @@
 module Flickrize
   def self.initialize_with options
-    require 'flickraw'
-    #require 'will_paginate'
     FlickRaw.api_key = options[:api_key]
     FlickRaw.shared_secret = options[:shared_secret]
     if options[:auth_token]
@@ -117,6 +115,7 @@ module Flickrize
       end
     end
   end
+  require 'action_view'
   module ActionView
     require 'will_paginate/view_helpers/action_view'
     include WillPaginate::ActionView
