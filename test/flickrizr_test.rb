@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'flickrize/flickrizr'
 
-class FlickrizeTest < ActiveSupport::TestCase
+class FlickrizrTest < ActiveSupport::TestCase
   
   test 'respond_to_flickrizr' do
     assert_respond_to(Photo, :flickrizr)
