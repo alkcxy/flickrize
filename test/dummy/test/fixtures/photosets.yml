@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+# one:
+  # set_id: 
+  # title: MyString
+  # description: 
+  # url: MyString
+# 
+# two:
+  # set_id: 
+  # title: MyString
+  # description: 
+  # url: MyString

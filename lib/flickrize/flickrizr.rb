@@ -59,8 +59,8 @@ module Flickrize
             rescue Exception => e
               flickr.photos.delete photo_id: flickr_id
               record.errors.add options[:image], e
-              return false
             end
+            return false if record.errors.any?
           else
             return false
           end

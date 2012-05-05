@@ -1,29 +1,29 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
 
-one:
-  flickr_id: 1
-  title: MyString
-  set_id: 1
-  gallery_id: 1
-  description: MyText
-  is_public: false
-  hidden: 1
-  farm: 1
-  server: 1
-  secret: MyString
-  originalsecret: MyString
-  originalformat: MyString
-
-two:
-  flickr_id: 1
-  title: MyString
-  set_id: 1
-  gallery_id: 1
-  description: MyText
-  is_public: false
-  hidden: 1
-  farm: 1
-  server: 1
-  secret: MyString
-  originalsecret: MyString
-  originalformat: MyString
+# one:
+  # flickr_id: 1
+  # title: MyString
+  # set_id: 1
+  # gallery_id: 1
+  # description: MyText
+  # is_public: false
+  # hidden: 1
+  # farm: 1
+  # server: 1
+  # secret: MyString
+  # originalsecret: MyString
+  # originalformat: MyString
+# 
+# two:
+  # flickr_id: 1
+  # title: MyString
+  # set_id: 1
+  # gallery_id: 1
+  # description: MyText
+  # is_public: false
+  # hidden: 1
+  # farm: 1
+  # server: 1
+  # secret: MyString
+  # originalsecret: MyString
+  # originalformat: MyString

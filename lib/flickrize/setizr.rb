@@ -1,6 +1,7 @@
 module Flickrize
   module Setizr
     require 'active_support/concern'
+    require 'active_support/inflector'
     require 'flickraw'
     extend ActiveSupport::Concern
 
@@ -10,10 +11,9 @@ module Flickrize
     module ClassMethods
 
       def setizr(options={})
-        options.reverse_merge! set_id: :set_id, title: :title, description: :description, url: :set_url, primary_photo_id: :primary_photo_id
-        
+        options.reverse_merge! set_id: :set_id, title: :title, description: :description, url: :set_url, primary_photo_id: :primary_photo_id, photo: :photo
+        attr_accessor options[:photo]
         attr_protected options[:set_id], options[:url]
-        attr_accessor options[:primary_photo_id]
 
         before_create do |record|
           begin
@@ -23,6 +23,14 @@ module Flickrize
           rescue Exception => e
             record.errors.add options[:set_id], e
             return false
+          end
+        end
+        
+        after_create do |record|
+          if !options[:photo].nil?
+            photo_class = eval(options[:photo].to_s.capitalize)
+            photo = photo_class.send("find_by_#{photo_class.iop[:flickr_id].to_s}", record.send(options[:primary_photo_id]))
+            photo.send("#{ActiveSupport::Inflector.pluralize(record.class.name.downcase)}") << record
           end
         end
         

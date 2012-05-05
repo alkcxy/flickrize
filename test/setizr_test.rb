@@ -21,20 +21,20 @@ class SetizrTest < ActiveSupport::TestCase
   end
   
   #test before_create and before_update and before_destroy inside setizr
-  test 'before_create_set_id' do
-    set = Photoset.new(title: "titolo", description: "descrizione", primary_photo_id: 6336163931)
-    assert(set.save, "non ha salvato")
-    assert_not_nil(set.set_id)
-    # update a set
-    set.update_attributes(title: "titolo2", description: "description2")
-    # destroy a set
-    assert(set.destroy, "set non cancellato")
-    assert_raise FlickRaw::FailedResponse do
-      flickr.photosets.getInfo photoset_id: set.set_id
-      "esiste ancora!"
-    end
-    assert_nil(Photoset.find_by_set_id(set.set_id))
-  end
+#  test 'before_create_set_id' do
+#    set = Photoset.new(title: "titolo", description: "descrizione", primary_photo_id: 6336163931)
+#    assert(set.save, "non ha salvato")
+#    assert_not_nil(set.set_id)
+#    # update a set
+#    set.update_attributes(title: "titolo2", description: "description2")
+#    # destroy a set
+#    assert(set.destroy, "set non cancellato")
+#    assert_raise FlickRaw::FailedResponse do
+#      flickr.photosets.getInfo photoset_id: set.set_id
+#      "esiste ancora!"
+#    end
+#    assert_nil(Photoset.find_by_set_id(set.set_id))
+#  end
 
   #test before_create and before_update and before_destroy inside setizr
   test 'before_create_photoset_id' do
