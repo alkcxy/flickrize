@@ -26,6 +26,7 @@ module Flickrize
           end
         end
         
+        # change to after_save to edit primary photo id of a set (it's disabled because some bugs)
         after_create do |record|
           if !options[:photo].nil?
             photo_class = eval(options[:photo].to_s.capitalize)
@@ -37,6 +38,8 @@ module Flickrize
         before_update do |record|
           begin
             flickr.photosets.editMeta photoset_id: record.send(options[:set_id]), title: record.send(options[:title]), description: record.send(options[:description])
+            # uncomment to edit primary photo id of a set (it's disabled because some bugs)
+            #flickr.photosets.setPrimaryPhoto photoset_id: record.send(options[:set_id]), photo_id: record.send(options[:primary_photo_id])
           rescue Exception => e
             record.errors.add options[:set_id], e
             return false
