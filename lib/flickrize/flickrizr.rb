@@ -19,10 +19,11 @@ module Flickrize
         #end
 
         before_create do |record|
+          public = record.send(options[:is_public]) ? 1 : 0
           if !record.send(options[:image]).blank? && record.send(options[:image]).respond_to?(:path)
             flickr_image = record.send(options[:image])
             begin
-              flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => record.send(options[:is_public]), :hidden => record.send(options[:hidden]))
+              flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => public, :hidden => record.send(options[:hidden]))
             rescue Exception => e
               record.errors.add options[:image], e
             end
@@ -34,7 +35,7 @@ module Flickrize
                 flickr_image.binmode.write(image_url.read(4096)) while !image_url.eof
                 flickr_image.rewind
                 begin
-                  flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => record.send(options[:is_public]), :hidden => record.send(options[:hidden]))
+                  flickr_id = flickr.upload_photo(flickr_image.path, :title => record.send(options[:title]), :description => record.send(options[:description]), :is_public => public, :hidden => record.send(options[:hidden]))
                 rescue Exception => e
                   record.errors.add options[:image], e
                 end
@@ -69,18 +70,25 @@ module Flickrize
         before_update do |record|
           begin
             flickr.photos.setMeta photo_id: record.send(options[:flickr_id]), title: record.send(options[:title]), description: record.send(options[:description])
-            sets = flickr.photos.getAllContexts(photo_id: record.send(options[:flickr_id])).set
-            set_ids = record.send(options[:set_ids])
-            sets.each do |set|
-              ps = set_ids.key(set.id)
-              if ps.blank?
-                flickr.photosets.removePhoto photo_id: record.send(options[:flickr_id]), photoset_id: set.id
-              else
-                set_ids.delete ps
+            public = record.send(options[:is_public]) ? 1 : 0
+            flickr.photos.setPerms photo_id: record.send(options[:flickr_id]), is_public: public, is_family: 0, is_friend: 0, perm_comment: 0, perm_addmeta: 0
+            hidden = record.send(options[:hidden]) == 2 ? 0 : 1
+            flickr.photos.setSafetyLevel photo_id: record.send(options[:flickr_id]), hidden: hidden
+            context = flickr.photos.getAllContexts(photo_id: record.send(options[:flickr_id]))
+            unless context.to_hash.empty?
+              sets = context.set
+              set_ids = record.send(options[:set_ids])
+              sets.each do |set|
+                ps = set_ids.key(set.id)
+                if ps.blank?
+                  flickr.photosets.removePhoto photo_id: record.send(options[:flickr_id]), photoset_id: set.id
+                else
+                  set_ids.delete ps
+                end
               end
-            end
-            set_ids.each do |k, set_id|
-              flickr.photosets.addPhoto photo_id: record.send(options[:flickr_id]), photoset_id: set_id
+              set_ids.each do |k, set_id|
+                flickr.photosets.addPhoto photo_id: record.send(options[:flickr_id]), photoset_id: set_id
+              end
             end
           rescue Exception => e
             record.errors.add options[:image], e
