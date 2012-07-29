@@ -90,6 +90,12 @@ module Flickrize
                 flickr.photosets.addPhoto photo_id: record.send(options[:flickr_id]), photoset_id: set_id
               end
             end
+            flickr_obj = flickr.photos.getInfo(:photo_id => options[:flickr_id])
+            record.send("#{options[:farm]}=", flickr_obj.farm)
+            record.send("#{options[:server]}=", flickr_obj.server)
+            record.send("#{options[:secret]}=", flickr_obj.secret)
+            record.send("#{options[:originalsecret]}=", flickr_obj.originalsecret)
+            record.send("#{options[:originalformat]}=", flickr_obj.originalformat)
           rescue Exception => e
             record.errors.add options[:image], e
             return false
