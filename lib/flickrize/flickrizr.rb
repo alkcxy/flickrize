@@ -119,12 +119,14 @@ module Flickrize
       if sym.to_s.start_with? "url_"
         url_suffix = sym.to_s.sub(/^url/,"")
         format = "jpg"
+        secret = self.send(self.iop[:secret]) 
         if sym.to_s.end_with? "_o"
           format = self.send(self.iop[:originalformat])
+          secret = self.send(self.iop[:originalsecret])
         elsif sym.to_s.end_with? "_"
           url_suffix = ""
         end
-        PHOTO_SOURCE_URL % [self.send(self.iop[:farm]), self.send(self.iop[:server]), self.send(self.iop[:flickr_id]), self.send(self.iop[:secret]), url_suffix, format]
+        PHOTO_SOURCE_URL % [self.send(self.iop[:farm]), self.send(self.iop[:server]), self.send(self.iop[:flickr_id]), secret, url_suffix, format]
       else
         super
       end
