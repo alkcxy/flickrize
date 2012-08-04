@@ -79,7 +79,7 @@ module Flickrize
               sets = context.set
               set_ids = record.send(options[:set_ids])
               sets.each do |set|
-                ps = set_ids.key(set.id)
+                ps = set_ids.blank? ? nil : set_ids.key(set.id) 
                 if ps.blank?
                   flickr.photosets.removePhoto photo_id: record.send(options[:flickr_id]), photoset_id: set.id
                 else
